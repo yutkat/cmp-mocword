@@ -1,35 +1,25 @@
+local Job = require("plenary.job")
 local M = {}
 
-local function split(src, sep)
-	local result, i = {}, 1
-	while true do
-		local a, b = src:find(sep)
-		if not a then
-			break
-		end
-		local candidat = src:sub(1, a - 1)
-		if candidat ~= "" then
-			result[i] = candidat
-		end
-		i = i + 1
-		src = src:sub(b + 1)
+local function candidates(input, callback)
+	if input == "" then
+		return
 	end
-	if src ~= "" then
-		result[i] = src
-	end
-	return result
-end
-
-local function candidates(input)
-	local command = "mocword -q " .. '"' .. input .. '"'
-	local raw_output = vim.fn.system(command)
-	local words = split(raw_output, "\n")
-	local items = vim.tbl_map(function(w)
-		return {
-			label = w,
-		}
-	end, words)
-	return { items = items, isIncomplete = true }
+	Job
+		:new({
+			command = "mocword",
+			args = { "-q", input },
+			on_exit = function(job, return_val)
+				local result = job:result()
+				local items = vim.tbl_map(function(w)
+					return {
+						label = w,
+					}
+				end, result)
+				callback({ items = items, isIncomplete = true })
+			end,
+		})
+		:start()
 end
 
 function M.new()
@@ -50,7 +40,7 @@ end
 
 function M.complete(self, request, callback)
 	local input = request.context.cursor_before_line
-	callback(candidates(input))
+	candidates(input, callback)
 end
 
 return M

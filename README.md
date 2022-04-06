@@ -6,6 +6,7 @@
 
 - [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
 - [mocword](https://github.com/high-moctane/mocword)
+- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 
 ## Installation
 
